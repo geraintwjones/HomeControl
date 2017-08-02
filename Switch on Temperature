@@ -1,0 +1,704 @@
+[
+    {
+        "id": "6de85020.aa5ac",
+        "type": "subflow",
+        "name": "Hive logoff",
+        "info": "Requires msg.this_session to be the value returned when logging on to Hive.",
+        "in": [
+            {
+                "x": 60,
+                "y": 60,
+                "wires": [
+                    {
+                        "id": "b05b37b7.314988"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 620,
+                "y": 60,
+                "wires": [
+                    {
+                        "id": "650ece90.69d438",
+                        "port": 0
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "b05b37b7.314988",
+        "type": "function",
+        "z": "6de85020.aa5ac",
+        "name": "Set Hive header & URL for Logout",
+        "func": "msg.headers = {\n      'Content-Type' : 'application/vnd.alertme.zoo-6.1+json',\n      'Accept' : 'application/vnd.alertme.zoo-6.1+json',\n      'X-Omnia-Client' : 'Hive Web Dashboard',\n      'X-Omnia-Access-Token' : msg.this_session\n}\n\nmsg.url = \"https://api-prod.bgchprod.info/omnia/auth/sessions/\"+msg.this_session\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 240,
+        "y": 60,
+        "wires": [
+            [
+                "650ece90.69d438"
+            ]
+        ]
+    },
+    {
+        "id": "650ece90.69d438",
+        "type": "http request",
+        "z": "6de85020.aa5ac",
+        "name": "Logout from Hive",
+        "method": "DELETE",
+        "ret": "txt",
+        "url": "",
+        "tls": "",
+        "x": 490,
+        "y": 60,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "1acbb668.66687a",
+        "type": "subflow",
+        "name": "Load config",
+        "info": "",
+        "in": [
+            {
+                "x": 60,
+                "y": 60,
+                "wires": [
+                    {
+                        "id": "2ff9259b.34c61a"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 600,
+                "y": 60,
+                "wires": [
+                    {
+                        "id": "c2b53204.629738",
+                        "port": 0
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "2ff9259b.34c61a",
+        "type": "change",
+        "z": "1acbb668.66687a",
+        "name": "Set DB query",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "5c3c86cb44ba4c2d74ac88928de9d20e",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 170,
+        "y": 60,
+        "wires": [
+            [
+                "d611f6d4.8e4808"
+            ]
+        ]
+    },
+    {
+        "id": "d611f6d4.8e4808",
+        "type": "cloudant in",
+        "z": "1acbb668.66687a",
+        "name": "Load data",
+        "cloudant": "",
+        "database": "hive",
+        "service": "AutoHome-cloudantNoSQLDB",
+        "search": "_id_",
+        "design": "",
+        "index": "",
+        "x": 320,
+        "y": 60,
+        "wires": [
+            [
+                "c2b53204.629738"
+            ]
+        ]
+    },
+    {
+        "id": "c2b53204.629738",
+        "type": "change",
+        "z": "1acbb668.66687a",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "config",
+                "pt": "msg",
+                "to": "cloudant",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 480,
+        "y": 60,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "fce82eda.dc458",
+        "type": "subflow",
+        "name": "Hive logon",
+        "info": "",
+        "in": [
+            {
+                "x": 60,
+                "y": 60,
+                "wires": [
+                    {
+                        "id": "76b24098.d6f068"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 580,
+                "y": 160,
+                "wires": [
+                    {
+                        "id": "fe8b977e.8a674",
+                        "port": 0
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "76b24098.d6f068",
+        "type": "function",
+        "z": "fce82eda.dc458",
+        "name": "Set Hive request header",
+        "func": "msg.headers = {\n      'Content-Type' : 'application/vnd.alertme.zoo-6.1+json',\n      'Accept' : 'application/vnd.alertme.zoo-6.1+json',\n      'X-Omnia-Client' : 'Hive Web Dashboard'\n};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 210,
+        "y": 60,
+        "wires": [
+            [
+                "4a95ca41.34726c"
+            ]
+        ]
+    },
+    {
+        "id": "16c7c235.a82566",
+        "type": "function",
+        "z": "fce82eda.dc458",
+        "name": "Set Hive username and password",
+        "func": "msg.payload = JSON.stringify({\n      sessions: [\n                  { username: msg.config.username,\n                    password: msg.config.password,\n                    caller: \"WEB\" \n                  }\n                ]  \n    }\n)\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 240,
+        "y": 160,
+        "wires": [
+            [
+                "fe8b977e.8a674"
+            ]
+        ]
+    },
+    {
+        "id": "fe8b977e.8a674",
+        "type": "http request",
+        "z": "fce82eda.dc458",
+        "name": "Login to Hive",
+        "method": "POST",
+        "ret": "obj",
+        "url": "https://api-prod.bgchprod.info/omnia/auth/sessions",
+        "tls": "",
+        "x": 470,
+        "y": 160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "4a95ca41.34726c",
+        "type": "subflow:1acbb668.66687a",
+        "z": "fce82eda.dc458",
+        "name": "",
+        "x": 420,
+        "y": 60,
+        "wires": [
+            [
+                "16c7c235.a82566"
+            ]
+        ]
+    },
+    {
+        "id": "65764d39.6c767c",
+        "type": "inject",
+        "z": "62700817.3527f",
+        "name": "GO",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "x": 110,
+        "y": 60,
+        "wires": [
+            [
+                "9263e9cd.e8e5f8"
+            ]
+        ]
+    },
+    {
+        "id": "cbb9c509.7b5178",
+        "type": "switch",
+        "z": "62700817.3527f",
+        "name": "Logged In?",
+        "property": "statusCode",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "neq",
+                "v": "200",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "200",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "outputs": 2,
+        "x": 590,
+        "y": 60,
+        "wires": [
+            [
+                "aa2d5297.ec1fe"
+            ],
+            [
+                "8ee926de.404e5"
+            ]
+        ],
+        "outputLabels": [
+            "no",
+            "yes"
+        ]
+    },
+    {
+        "id": "aa2d5297.ec1fe",
+        "type": "function",
+        "z": "62700817.3527f",
+        "name": "Prepare tweet",
+        "func": "msg.payload = \"Failed to log on to Hive.\\n\" + msg.timestamp;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 760,
+        "y": 40,
+        "wires": [
+            [
+                "2cb57257.e78a16"
+            ]
+        ]
+    },
+    {
+        "id": "2cb57257.e78a16",
+        "type": "twitter out",
+        "z": "62700817.3527f",
+        "twitter": "",
+        "name": "Tweet",
+        "x": 910,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "8ee926de.404e5",
+        "type": "function",
+        "z": "62700817.3527f",
+        "name": "Set Hive header & URL",
+        "func": "if (msg.payload.sessions !== undefined){\n    \n    //save the session out to the msg so we can use it later on\n    msg.this_session = msg.payload.sessions[0].id;\n    \n    msg.url = \"https://api-prod.bgchprod.info/omnia/nodes\";\n\n    msg.headers = {\n      'Content-Type' : 'application/vnd.alertme.zoo-6.1+json',\n      'Accept' : 'application/vnd.alertme.zoo-6.1+json',\n      'X-Omnia-Client' : 'Hive Web Dashboard',\n      'X-Omnia-Access-Token' : msg.this_session\n    }\n    \n    return msg;\n}\n\nreturn null;",
+        "outputs": "1",
+        "noerr": 0,
+        "x": 290,
+        "y": 160,
+        "wires": [
+            [
+                "966cd3d0.9168e"
+            ]
+        ]
+    },
+    {
+        "id": "966cd3d0.9168e",
+        "type": "http request",
+        "z": "62700817.3527f",
+        "name": "Get all Hive nodes",
+        "method": "GET",
+        "ret": "obj",
+        "url": "https://api-prod.bgchprod.info/omnia/nodes",
+        "tls": "",
+        "x": 510,
+        "y": 160,
+        "wires": [
+            [
+                "7705621a.10921c"
+            ]
+        ]
+    },
+    {
+        "id": "7705621a.10921c",
+        "type": "function",
+        "z": "62700817.3527f",
+        "name": "Get Temperature",
+        "func": "if(msg.payload.nodes !== undefined){\n    \n    var nodes = msg.payload.nodes;\n    \n    for (var n in nodes){\n        \n        var attribs = nodes[n].attributes;\n        \n        if(nodes[n].name==\"Receiver\"){\n            if(attribs.temperature !== undefined){\n                msg.temperature = attribs.temperature.reportedValue;\n            }\n        }\n    }    \n}\n\nreturn msg;\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 710,
+        "y": 160,
+        "wires": [
+            [
+                "43848edf.d4ecb"
+            ]
+        ]
+    },
+    {
+        "id": "9326443.70bc9b8",
+        "type": "function",
+        "z": "62700817.3527f",
+        "name": "Prepare tweet",
+        "func": "msg.payload = \"Temperature is \" + msg.temperature + \"°C => Switched \" + msg.config.node_name + \" \" + msg.new_node_state + \"\\n\" + msg.timestamp;\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 700,
+        "y": 440,
+        "wires": [
+            [
+                "847f3f2f.f2b1a8"
+            ]
+        ]
+    },
+    {
+        "id": "847f3f2f.f2b1a8",
+        "type": "twitter out",
+        "z": "62700817.3527f",
+        "twitter": "",
+        "name": "Tweet",
+        "x": 850,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "b797a68d.ac02c",
+        "type": "switch",
+        "z": "62700817.3527f",
+        "name": "Switch on or off?",
+        "property": "temperature",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "gte",
+                "v": "config.on_temperature",
+                "vt": "msg"
+            },
+            {
+                "t": "lte",
+                "v": "config.off_temperature",
+                "vt": "msg"
+            }
+        ],
+        "checkall": "true",
+        "outputs": 2,
+        "x": 270,
+        "y": 360,
+        "wires": [
+            [
+                "73e89b82.516b3c"
+            ],
+            [
+                "68dbe087.b86328"
+            ]
+        ],
+        "outputLabels": [
+            "on",
+            "off"
+        ]
+    },
+    {
+        "id": "43848edf.d4ecb",
+        "type": "function",
+        "z": "62700817.3527f",
+        "name": "Find node",
+        "func": "if(msg.payload.nodes !== undefined){\n    \n    var nodes = msg.payload.nodes;\n    \n    for (var n in nodes){\n        \n        var attribs = nodes[n].attributes;\n        \n        if(nodes[n].name == msg.config.node_name){\n            msg.node_id = nodes[n].id;\n            msg.node_state = nodes[n].attributes.state.reportedValue;\n        }\n    }    \n}\n\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 240,
+        "y": 260,
+        "wires": [
+            [
+                "ed2b81c7.407a4"
+            ]
+        ]
+    },
+    {
+        "id": "ed2b81c7.407a4",
+        "type": "switch",
+        "z": "62700817.3527f",
+        "name": "Found node?",
+        "property": "node_id",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "null"
+            },
+            {
+                "t": "nnull"
+            }
+        ],
+        "checkall": "true",
+        "outputs": 2,
+        "x": 390,
+        "y": 260,
+        "wires": [
+            [
+                "81e7287f.5043b",
+                "232a408.363e2c"
+            ],
+            [
+                "b797a68d.ac02c"
+            ]
+        ],
+        "outputLabels": [
+            "no",
+            "yes"
+        ]
+    },
+    {
+        "id": "81e7287f.5043b",
+        "type": "function",
+        "z": "62700817.3527f",
+        "name": "Prepare tweet",
+        "func": "msg.payload = \"Could not find node \\\"\" + msg.config.node_name + \"\\\"\\n\" + msg.timestamp;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 620,
+        "y": 240,
+        "wires": [
+            [
+                "a5c8e793.374098"
+            ]
+        ]
+    },
+    {
+        "id": "a5c8e793.374098",
+        "type": "twitter out",
+        "z": "62700817.3527f",
+        "twitter": "",
+        "name": "Tweet",
+        "x": 770,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "68dbe087.b86328",
+        "type": "function",
+        "z": "62700817.3527f",
+        "name": "State = OFF",
+        "func": "msg.new_node_state = \"OFF\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 450,
+        "y": 380,
+        "wires": [
+            [
+                "8bdb6d32.b2f14"
+            ]
+        ]
+    },
+    {
+        "id": "73e89b82.516b3c",
+        "type": "function",
+        "z": "62700817.3527f",
+        "name": "State = ON",
+        "func": "msg.new_node_state = \"ON\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 450,
+        "y": 340,
+        "wires": [
+            [
+                "8bdb6d32.b2f14"
+            ]
+        ]
+    },
+    {
+        "id": "8bdb6d32.b2f14",
+        "type": "switch",
+        "z": "62700817.3527f",
+        "name": "State changed?",
+        "property": "node_state",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "new_node_state",
+                "vt": "msg"
+            },
+            {
+                "t": "neq",
+                "v": "new_node_state",
+                "vt": "msg"
+            }
+        ],
+        "checkall": "true",
+        "outputs": 2,
+        "x": 620,
+        "y": 360,
+        "wires": [
+            [
+                "a907c6aa.8186e8"
+            ],
+            [
+                "d2cc4f81.810338"
+            ]
+        ],
+        "outputLabels": [
+            "no",
+            "yes"
+        ]
+    },
+    {
+        "id": "d2cc4f81.810338",
+        "type": "function",
+        "z": "62700817.3527f",
+        "name": "Set Hive message & URL",
+        "func": "msg.headers = {\n  'Content-Type' : 'application/vnd.alertme.zoo-6.1+json',\n  'Accept' : 'application/vnd.alertme.zoo-6.1+json',\n  'X-Omnia-Client' : 'Hive Web Dashboard',\n  'X-Omnia-Access-Token' : msg.this_session\n}\n\nmsg.url = \"https://api-prod.bgchprod.info/omnia/nodes/\" + msg.node_id;\n\nmsg.payload =\n    {\n        nodes:[{\n            attributes : {\n                state: {targetValue: msg.new_node_state}\n            }\n        }]\n    };\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 290,
+        "y": 460,
+        "wires": [
+            [
+                "40ba552e.176094"
+            ]
+        ]
+    },
+    {
+        "id": "40ba552e.176094",
+        "type": "http request",
+        "z": "62700817.3527f",
+        "name": "Update Hive node",
+        "method": "PUT",
+        "ret": "obj",
+        "url": "",
+        "tls": "",
+        "x": 510,
+        "y": 460,
+        "wires": [
+            [
+                "9326443.70bc9b8",
+                "b0654422.4e09e8"
+            ]
+        ]
+    },
+    {
+        "id": "cb0d67ff.ded3b8",
+        "type": "subflow:fce82eda.dc458",
+        "z": "62700817.3527f",
+        "x": 430,
+        "y": 60,
+        "wires": [
+            [
+                "cbb9c509.7b5178"
+            ]
+        ]
+    },
+    {
+        "id": "232a408.363e2c",
+        "type": "subflow:6de85020.aa5ac",
+        "z": "62700817.3527f",
+        "x": 610,
+        "y": 280,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a907c6aa.8186e8",
+        "type": "subflow:6de85020.aa5ac",
+        "z": "62700817.3527f",
+        "x": 790,
+        "y": 340,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b0654422.4e09e8",
+        "type": "subflow:6de85020.aa5ac",
+        "z": "62700817.3527f",
+        "x": 690,
+        "y": 480,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "9263e9cd.e8e5f8",
+        "type": "function",
+        "z": "62700817.3527f",
+        "name": "Set timestamp",
+        "func": "msg.timestamp = new Date();\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 260,
+        "y": 60,
+        "wires": [
+            [
+                "cb0d67ff.ded3b8"
+            ]
+        ]
+    },
+    {
+        "id": "b4509fe7.a82608",
+        "type": "status",
+        "z": "62700817.3527f",
+        "name": "Status",
+        "scope": null,
+        "x": 230,
+        "y": 540,
+        "wires": [
+            [
+                "61106d5c.1c80cc"
+            ]
+        ]
+    },
+    {
+        "id": "61106d5c.1c80cc",
+        "type": "debug",
+        "z": "62700817.3527f",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "true",
+        "x": 350,
+        "y": 540,
+        "wires": []
+    }
+]
